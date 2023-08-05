@@ -60,8 +60,8 @@ wall <- getWallExecute(domain = "supcolorc", count = 10000, progress_bar = TRUE)
 posts <- c()
 posts <- c(wall, as.vector(posts$body))
 
-# Î÷èùàåì òåêñò îò "ìóñîðà"
-posts <- str_replace_all(posts, "[¸]", "å")
+# ÃŽÃ·Ã¨Ã¹Ã Ã¥Ã¬ Ã²Ã¥ÃªÃ±Ã² Ã®Ã² "Ã¬Ã³Ã±Ã®Ã°Ã "
+posts <- str_replace_all(posts, "[Â¸]", "Ã¥")
 posts <- str_replace_all(posts, "[[:punct:]]", " ")
 posts <- str_replace_all(posts, "[[:digit:]]", " ")
 posts <- str_replace_all(posts, "http\\S+\\s*", " ")
@@ -72,26 +72,26 @@ posts <- str_trim(posts, side = "both")
 
 write(posts, file='posts_processed.txt')
 
-#ÀËÃÎÐÈÒÌ K-MEANS
+#Ã€Ã‹ÃƒÃŽÃÃˆÃ’ÃŒ K-MEANS
 posts_norm <- readLines("posts_processed_norm.txt", encoding="UTF-8")
 
-# Ñîçäàåì êîðïóñ èç ñîîáùåíèé
+# Ã‘Ã®Ã§Ã¤Ã Ã¥Ã¬ ÃªÃ®Ã°Ã¯Ã³Ã± Ã¨Ã§ Ã±Ã®Ã®Ã¡Ã¹Ã¥Ã­Ã¨Ã©
 posts.corpus <- Corpus(VectorSource(posts_norm))
 
-# Èçáàâëÿåìñÿ îò ñòîï-ñëîâ
+# ÃˆÃ§Ã¡Ã Ã¢Ã«Ã¿Ã¥Ã¬Ã±Ã¿ Ã®Ã² Ã±Ã²Ã®Ã¯-Ã±Ã«Ã®Ã¢
 stop_words <- read.table('stop_words_russian.txt', encoding="UTF-8")
 stop_words <- as.vector(stop_words$V1)
 
 posts.corpus <- tm_map(posts.corpus, removeWords, stop_words)
 
-# Óäàëÿåì âñå ëèøíèå ïðîáåëüíûå ñèìâîëû
+# Ã“Ã¤Ã Ã«Ã¿Ã¥Ã¬ Ã¢Ã±Ã¥ Ã«Ã¨Ã¸Ã­Ã¨Ã¥ Ã¯Ã°Ã®Ã¡Ã¥Ã«Ã¼Ã­Ã»Ã¥ Ã±Ã¨Ã¬Ã¢Ã®Ã«Ã»
 posts.corpus <- tm_map(posts.corpus, stripWhitespace)
 
 posts.tdm <- TermDocumentMatrix(posts.corpus)
 posts.tdm
 posts.tdm.non.sparse <- removeSparseTerms(posts.tdm, 0.90)
 
-# Êëàñòåðèçàöèÿ äîêóìåíòîâ
+# ÃŠÃ«Ã Ã±Ã²Ã¥Ã°Ã¨Ã§Ã Ã¶Ã¨Ã¿ Ã¤Ã®ÃªÃ³Ã¬Ã¥Ã­Ã²Ã®Ã¢
 N <- 5
 model <- kmeans(posts.tdm.non.sparse, N)
 
@@ -99,7 +99,7 @@ for (cluster in 1:N) {
   cat("cluster ", cluster, ": ", as.vector(names(model$cluster[model$cluster == cluster])), "\n")
 }
 
-# Ïîñòðîåíèå îáëàêà ñëîâ
+# ÃÃ®Ã±Ã²Ã°Ã®Ã¥Ã­Ã¨Ã¥ Ã®Ã¡Ã«Ã ÃªÃ  Ã±Ã«Ã®Ã¢
 library(wordcloud)
 posts.matrix <- as.matrix(posts.tdm.non.sparse)
 words.freq <- sort(rowSums(posts.matrix), decreasing = TRUE)
@@ -107,15 +107,15 @@ wordcloud(words = names(words.freq), freq = words.freq,
           scale = c(5, 1.0), min.freq = 5, random.order = FALSE,
           rot.per = 0.35, use.r.layout = FALSE, colors = brewer.pal(8, "Dark2"))
 
-#ÀËÃÎÐÈÒÌ LDA
+#Ã€Ã‹ÃƒÃŽÃÃˆÃ’ÃŒ LDA
 posts_norm <- readLines("posts_norm.txt", encoding="UTF-8")
 
-# Ïîñòðîåíèå òàáëèöû ÷àñòîò
+# ÃÃ®Ã±Ã²Ã°Ã®Ã¥Ã­Ã¨Ã¥ Ã²Ã Ã¡Ã«Ã¨Ã¶Ã» Ã·Ã Ã±Ã²Ã®Ã²
 doc.list <- strsplit(posts_norm, "[[:space:]]+")
 term.table <- table(unlist(doc.list))
 term.table <- sort(term.table, decreasing = TRUE)
 
-# Èçáàâëÿåìñÿ îò ñòîï-ñëîâ
+# ÃˆÃ§Ã¡Ã Ã¢Ã«Ã¿Ã¥Ã¬Ã±Ã¿ Ã®Ã² Ã±Ã²Ã®Ã¯-Ã±Ã«Ã®Ã¢
 stop_words <- read.table('stop_words_russian.txt', encoding="UTF-8")
 stop_words <- as.vector(stop_words$V1)
 
@@ -123,7 +123,7 @@ del <- names(term.table) %in% stop_words | term.table < 5
 term.table <- term.table[!del]
 vocab <- names(term.table)
 
-# Ïðèâîäèì ñïèñîê òåðìèíîâ ê ôîðìàòó ïîíÿòíîìó lda
+# ÃÃ°Ã¨Ã¢Ã®Ã¤Ã¨Ã¬ Ã±Ã¯Ã¨Ã±Ã®Ãª Ã²Ã¥Ã°Ã¬Ã¨Ã­Ã®Ã¢ Ãª Ã´Ã®Ã°Ã¬Ã Ã²Ã³ Ã¯Ã®Ã­Ã¿Ã²Ã­Ã®Ã¬Ã³ lda
 get.terms <- function(x) {
   index <- match(x, vocab)
   index <- index[!is.na(index)]
@@ -131,26 +131,26 @@ get.terms <- function(x) {
 }
 documents <- lapply(doc.list, get.terms)
 
-# Âû÷èñëåíèå íåêîòîðûõ ñòàòèñòèê
+# Ã‚Ã»Ã·Ã¨Ã±Ã«Ã¥Ã­Ã¨Ã¥ Ã­Ã¥ÃªÃ®Ã²Ã®Ã°Ã»Ãµ Ã±Ã²Ã Ã²Ã¨Ã±Ã²Ã¨Ãª
 D <- length(documents)
 W <- length(vocab)
 doc.length <- sapply(documents, function(x) sum(x[2, ])) 
 N <- sum(doc.length)
 term.frequency <- as.integer(term.table)
 
-# Ïàðàìåòðû ìîäåëè
+# ÃÃ Ã°Ã Ã¬Ã¥Ã²Ã°Ã» Ã¬Ã®Ã¤Ã¥Ã«Ã¨
 K <- 5
 G <- 1000
 alpha <- 0.02
 eta <- 0.02
 
-# Ïîñòðîåíèå ìîäåëè
+# ÃÃ®Ã±Ã²Ã°Ã®Ã¥Ã­Ã¨Ã¥ Ã¬Ã®Ã¤Ã¥Ã«Ã¨
 fit <- lda.collapsed.gibbs.sampler(documents = documents, K = K, vocab = vocab, 
                                    num.iterations = G, alpha = alpha, 
                                    eta = eta, initial = NULL, burnin = 0,
                                    compute.log.likelihood = TRUE)
 
-# Âèçóàëèçàöèÿ ìîäåëè ñ ïîìîùüþ LDAVis
+# Ã‚Ã¨Ã§Ã³Ã Ã«Ã¨Ã§Ã Ã¶Ã¨Ã¿ Ã¬Ã®Ã¤Ã¥Ã«Ã¨ Ã± Ã¯Ã®Ã¬Ã®Ã¹Ã¼Ã¾ LDAVis
 theta <- t(apply(fit$document_sums + alpha, 2, function(x) x/sum(x)))
 phi <- t(apply(t(fit$topics) + eta, 2, function(x) x/sum(x)))
 
